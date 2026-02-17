@@ -1,0 +1,3 @@
+"""
+Hausverwaltung - Property Management Application
+"""

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hausverwaltung"
+version = "0.1.0"
+description = "A property management app built with Toga and Pandas"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "PySide6>=6.10.2",
+    "pandas",
+    "setuptools>=75.3.4",
+]
+
+[project.optional-dependencies]
+build = ["pyinstaller"]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "isort>=5.12.0",
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+]
+lint = [
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "isort>=5.12.0",
+]
+
+[project.scripts]
+hausverwaltung = "src.main:main"
+
+[project.gui-scripts]
+hausverwaltung-gui = "src.main:main"
