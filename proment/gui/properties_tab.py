@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton
+from proment.logger import UniversalLogger
 
 class PropertiesTab(QWidget):
     def __init__(self, data_container, parent=None):
@@ -45,6 +46,6 @@ class PropertiesTab(QWidget):
                         self.properties_table.setItem(i, 6, QTableWidgetItem(str(row.get('floor', ''))))
                         self.properties_table.setItem(i, 7, QTableWidgetItem(str(row.get('description', ''))))
                 else:
-                    print("No properties data available")
+                    UniversalLogger.debug("No properties data available", caller_class='PropertiesTab')
         except Exception as e:
-            print(f"Error refreshing properties: {e}")
+            UniversalLogger.debug(f"Error refreshing properties: {e}", caller_class='PropertiesTab')

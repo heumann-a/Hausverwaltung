@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton
-from proment.data_container import TenantsContainer
+from proment.logger import UniversalLogger
 
 class TenantsTab(QWidget):
     def __init__(self, data_container, parent=None):
@@ -48,6 +48,6 @@ class TenantsTab(QWidget):
                         self.tenants_table.setItem(i, 7, QTableWidgetItem(tenant.phone_number if tenant.phone_number else ''))
                         self.tenants_table.setItem(i, 8, QTableWidgetItem(str(tenant.amount_people)))
                 else:
-                    print("No tenants data available")
+                    UniversalLogger.debug("No tenants data available", caller_class='TenantsTab')
         except Exception as e:
-            print(f"Error refreshing tenants: {e}")
+            UniversalLogger.debug(f"Error refreshing tenants: {e}", caller_class='TenantsTab')

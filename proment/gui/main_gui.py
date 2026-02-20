@@ -1,15 +1,15 @@
 import sys
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QWidget, QVBoxLayout,
     QTabWidget, QLabel, QFileDialog, QStatusBar
 )
 
-from proment.database import DatabaseHandler
-from proment.data_container import DataContainer
+from proment.sql.database import DatabaseHandler
+from proment.sql.datacontainer import DataContainer
 from proment.gui.properties_tab import PropertiesTab
 from proment.gui.tenants_tab import TenantsTab
+from proment.logger import UniversalLogger
 
 class UI_MainWindow(QMainWindow):
     def __init__(self, title="Hausverwaltung", app_id="net.heumann.hausverwaltung"):
@@ -104,7 +104,7 @@ class UI_MainWindow(QMainWindow):
             self, "Create New SQLite Database", "", "Database Files (*.db *.sqlite *.sqlite3)"
         )
         if file_path:
-            print(f"Creating new database: {file_path}")
+            UniversalLogger.debug(f"Creating new database: {file_path}", caller_class='UI_MainWindow')
             self.db_handler.close_connection()
             self.db_handler.open_connection(file_path)
             self.data_container.create_tables()
@@ -116,7 +116,7 @@ class UI_MainWindow(QMainWindow):
             self, "Open SQLite Database", "", "Database Files (*.db *.sqlite *.sqlite3)"
         )
         if file_path:
-            print(f"Selected file: {file_path}")
+            UniversalLogger.debug(f"Selected file: {file_path}", caller_class='UI_MainWindow')
             self.db_handler.close_connection()
             self.db_handler.open_connection(file_path)
             self.data_container.create_tables()
@@ -124,16 +124,16 @@ class UI_MainWindow(QMainWindow):
             self.tenants_tab.refresh_data()
 
     def action_save(self, widget=None):
-        print("Save clicked")
+        UniversalLogger.debug("Save clicked", caller_class='UI_MainWindow')
 
     def action_copy(self, widget=None):
-        print("Copy clicked")
+        UniversalLogger.debug("Copy clicked", caller_class='UI_MainWindow')
 
     def action_paste(self, widget=None):
-        print("Paste clicked")
+        UniversalLogger.debug("Paste clicked", caller_class='UI_MainWindow')
 
     def action_settings(self, widget=None):
-        print("Show Metrics clicked")
+        UniversalLogger.debug("Show Metrics clicked", caller_class='UI_MainWindow')
 
     def closeEvent(self, event):
         self.db_handler.close_connection()
