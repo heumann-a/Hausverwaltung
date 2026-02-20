@@ -10,6 +10,9 @@ from proment.sql.datacontainer import DataContainer
 from proment.gui.properties_tab import PropertiesTab
 from proment.gui.tenants_tab import TenantsTab
 from proment.logger import UniversalLogger
+from proment.sql.property import PropertyContainer
+from proment.sql.tenants import TenantsContainer
+
 
 class UI_MainWindow(QMainWindow):
     def __init__(self, title="Hausverwaltung", app_id="net.heumann.hausverwaltung"):
@@ -43,11 +46,12 @@ class UI_MainWindow(QMainWindow):
         self.main_layout.addWidget(self.tab_widget)
         
         # Properties Tab
-        self.properties_tab = PropertiesTab(self.data_container)
+
+        self.properties_tab = PropertiesTab(PropertyContainer(self.db_handler))
         self.tab_widget.addTab(self.properties_tab, "Properties")
         
         # Tenants Tab
-        self.tenants_tab = TenantsTab(self.data_container)
+        self.tenants_tab = TenantsTab(TenantsContainer(self.db_handler))
         self.tab_widget.addTab(self.tenants_tab, "Tenants")
         
         self.setStatusBar(QStatusBar())
@@ -119,7 +123,6 @@ class UI_MainWindow(QMainWindow):
             UniversalLogger.debug(f"Selected file: {file_path}", caller_class='UI_MainWindow')
             self.db_handler.close_connection()
             self.db_handler.open_connection(file_path)
-            self.data_container.create_tables()
             self.properties_tab.refresh_data()
             self.tenants_tab.refresh_data()
 

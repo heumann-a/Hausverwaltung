@@ -1,10 +1,12 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton
 from proment.logger import UniversalLogger
+from proment.sql.property import PropertyContainer
+
 
 class PropertiesTab(QWidget):
-    def __init__(self, data_container, parent=None):
+    def __init__(self, sql_data: PropertyContainer, parent=None):
         super().__init__(parent)
-        self.data_container = data_container
+        self.sql_data = sql_data
         self.setup_ui()
         
     def setup_ui(self):
@@ -29,13 +31,13 @@ class PropertiesTab(QWidget):
 
     def refresh_data(self):
         try:
-            if self.data_container.db_handler.connection:
-                self.data_container.load_data()
-                df = self.data_container.properties_df
+            if self.sql_data.db_handler.connection:
+                self.sql_data.load_data()
+                data = self.sql_data.get_all()
                 
                 self.properties_table.setRowCount(0)
-                if not df.empty:
-                    for i, (idx, row) in enumerate(df.iterrows()):
+                if not data.empty:
+                    for i, (idx, row) in enumerate(data.iterrows()):
                         self.properties_table.insertRow(i)
                         self.properties_table.setItem(i, 0, QTableWidgetItem(str(row.get('id', ''))))
                         self.properties_table.setItem(i, 1, QTableWidgetItem(str(row.get('zipcode', ''))))

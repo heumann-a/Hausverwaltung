@@ -1,10 +1,12 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton
 from proment.logger import UniversalLogger
+from proment.sql.tenants import TenantsContainer
+
 
 class TenantsTab(QWidget):
-    def __init__(self, data_container, parent=None):
+    def __init__(self, sql_data: TenantsContainer, parent=None):
         super().__init__(parent)
-        self.data_container = data_container
+        self.sql_data = sql_data
         self.setup_ui()
         
     def setup_ui(self):
@@ -29,14 +31,14 @@ class TenantsTab(QWidget):
 
     def refresh_data(self):
         try:
-            if self.data_container.db_handler.connection:
+            if self.sql_data.db_handler.connection:
                 # Use TenantsContainer to load data
-                self.data_container.load_data()
-                tenants = tenants_container.get_tenants()
-                
+                self.sql_data.load_data()
+                data  = self.sql_data.get_all()
+
                 self.tenants_table.setRowCount(0)
-                if tenants:
-                    for i, tenant in enumerate(tenants):
+                if not data.empty:
+                    for i, (idx, row) in enumerate(data.iterrows()):
                         self.tenants_table.insertRow(i)
                         self.tenants_table.setItem(i, 0, QTableWidgetItem(str(tenant.id if tenant.id is not None else '')))
                         self.tenants_table.setItem(i, 1, QTableWidgetItem(str(tenant.house_id)))
