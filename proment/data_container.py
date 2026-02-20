@@ -1,3 +1,4 @@
+from os import supports_effective_ids
 from typing import List, Optional
 import pandas as pd
 from abc import ABC
@@ -8,68 +9,12 @@ from proment.models import Property, Tenant
 class DataContainer(ABC):
     def __init__(self, db_handler: DatabaseHandler):
         self.db_handler = db_handler
-        self.properties_df = pd.DataFrame()
-        self.tenants_df = pd.DataFrame()
-        self.master_df = pd.DataFrame()
-        self.load_data()
 
     def load_data(self):
-        """Load all data from sqlite tables into pandas DataFrames."""
-        if not self.db_handler.connection:
-            return
-
-        try:
-            self.properties_df = pd.read_sql_query("SELECT * FROM properties", self.db_handler.connection)
-            self.tenants_df = pd.read_sql_query("SELECT * FROM tenants", self.db_handler.connection)
-            
-            if not self.properties_df.empty and not self.tenants_df.empty:
-                self.master_df = pd.merge(
-                    self.tenants_df,
-                    self.properties_df,
-                    left_on='house_id',
-                    right_on='id',
-                    suffixes=('_tenant', '_property')
-                )
-        except pd.io.sql.DatabaseError:
-            # Tables might not exist yet
-            pass
+        raise NotImplementedError
 
     def create_tables(self):
-        """Initialize the database schema if it doesn't exist."""
-        if not self.db_handler.connection:
-            return
-
-        cursor = self.db_handler.connection.cursor()
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS properties (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                zipcode TEXT NOT NULL,
-                city TEXT NOT NULL,
-                street TEXT NOT NULL,
-                housenumber TEXT NOT NULL,
-                unit INTEGER NOT NULL,
-                floor INTEGER NOT NULL,
-                description TEXT
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS tenants (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                house_id INTEGER NOT NULL,
-                family_name TEXT NOT NULL,
-                surname TEXT NOT NULL,
-                start_date TEXT NOT NULL,
-                end_date TEXT,
-                email TEXT,
-                phone_number TEXT,
-                amount_people INTEGER NOT NULL,
-                FOREIGN KEY (house_id) REFERENCES properties (id)
-            )
-        ''')
-        
-        self.db_handler.connection.commit()
+        raise NotImplementedError
 
     def add_properties(self, prop: Property) -> int:
         cursor = self.db_handler.connection.cursor()
@@ -104,18 +49,93 @@ class DataContainer(ABC):
         rows = cursor.fetchall()
         return [Tenant(id=row[0], house_id=row[1], family_name=row[2], surname=row[3], start_date=row[4], end_date=row[5], email=row[6], phone_number=row[7], amount_people=row[8]) for row in rows]
 
+    def error(self):
+        if not self.properties_df.empty and not self.tenants_df.empty:
+            self.master_df = pd.merge(
+                self.tenants_df,
+                self.properties_df,
+                left_on='house_id',
+                right_on='id',
+                suffixes=('_tenant', '_property')
+            )
+
 class TenantsContainer(DataContainer):
     def __init__(self, db_handler: DatabaseHandler):
-        self.db_handler = db_handler
-        self.properties_df = pd.DataFrame()
-        self.tenants_df = pd.DataFrame()
-        self.master_df = pd.DataFrame()
+        super().__init__(db_handler)
         self.load_data()
 
+    def load_data(self):
+        """Load all data from sqlite tables into pandas DataFrames."""
+        if not self.db_handler.connection:
+            return
+
+        try:
+            self.tenants_df = pd.read_sql_query("SELECT * FROM tenants", self.db_handler.connection)
+        except pd.io.sql.DatabaseError as e:
+            print(f"Error loading tenants data: {e}")
+
+    def create_tables(self):
+        """Initialize the database schema if it doesn't exist."""
+        if not self.db_handler.connection:
+            return
+
+        cursor = self.db_handler.connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tenants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                house_id INTEGER NOT NULL,
+                family_name TEXT NOT NULL,
+                surname TEXT NOT NULL,
+                start_date TEXT NOT NULL,
+                end_date TEXT,
+                email TEXT,
+                phone_number TEXT,
+                amount_people INTEGER NOT NULL,
+                FOREIGN KEY (house_id) REFERENCES properties (id)
+                )
+            ''')
+        self.db_handler.connection.commit()
 class PropertyContainer(DataContainer):
     def __init__(self, db_handler: DatabaseHandler):
-        self.db_handler = db_handler
-        self.properties_df = pd.DataFrame()
-        self.tenants_df = pd.DataFrame()
-        self.master_df = pd.DataFrame()
+        super().__init__(db_handler)
         self.load_data()
+
+    def load_data(self):
+        """Load all data from sqlite tables into pandas DataFrames."""
+        if not self.db_handler.connection:
+            return
+
+        try:
+            self.properties_df = pd.read_sql_query("SELECT * FROM properties", self.db_handler.connection)
+
+            if not self.properties_df.empty and not self.tenants_df.empty:
+                self.master_df = pd.merge(
+                    self.tenants_df,
+                    self.properties_df,
+                    left_on='house_id',
+                    right_on='id',
+                    suffixes=('_tenant', '_property')
+                )
+        except pd.io.sql.DatabaseError as e:
+            print(f"Error loading properties data: {e}")
+
+    def create_tables(self):
+        """Initialize the database schema if it doesn't exist."""
+        if not self.db_handler.connection:
+            return
+
+        cursor = self.db_handler.connection.cursor()
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS properties (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                zipcode TEXT NOT NULL,
+                city TEXT NOT NULL,
+                street TEXT NOT NULL,
+                housenumber TEXT NOT NULL,
+                unit INTEGER NOT NULL,
+                floor INTEGER NOT NULL,
+                description TEXT
+            )
+        ''')
+        self.db_handler.connection.commit()

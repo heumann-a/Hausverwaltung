@@ -31,7 +31,7 @@ class TenantsTab(QWidget):
         try:
             if self.data_container.db_handler.connection:
                 # Use TenantsContainer to load data
-                tenants_container = TenantsContainer(self.data_container.db_handler)
+                self.data_container.load_data()
                 tenants = tenants_container.get_tenants()
                 
                 self.tenants_table.setRowCount(0)
