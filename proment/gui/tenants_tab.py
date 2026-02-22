@@ -31,7 +31,7 @@ class TenantsTab(QWidget):
 
     def refresh_data(self):
         try:
-            if self.sql_data.db_handler.connection:
+            if self.sql_data.db_handler.session:
                 # Use TenantsContainer to load data
                 self.sql_data.load_data()
                 data  = self.sql_data.get_all()

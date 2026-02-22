@@ -10,6 +10,7 @@ setup(
     install_requires=[
         "PySide6",
         "pandas",
+        "SQLAlchemy>=2.0.0",
     ],
     extras_require={
         "build": ["pyinstaller"],

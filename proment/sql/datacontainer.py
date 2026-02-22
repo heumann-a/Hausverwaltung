@@ -1,11 +1,11 @@
 import pandas as pd
 from abc import ABC
 
-from proment.sql.database import DatabaseHandler
+from proment.sql.connection import DatabaseConnection
 
 
 class DataContainer(ABC):
-    def __init__(self, db_handler: DatabaseHandler):
+    def __init__(self, db_handler: DatabaseConnection):
         self.db_handler = db_handler
 
     def load_data(self):

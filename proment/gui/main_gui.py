@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QTabWidget, QLabel, QFileDialog, QStatusBar
 )
 
-from proment.sql.database import DatabaseHandler
+from proment.sql.connection import DatabaseConnection
 from proment.sql.datacontainer import DataContainer
 from proment.gui.properties_tab import PropertiesTab
 from proment.gui.tenants_tab import TenantsTab
@@ -25,7 +25,7 @@ class UI_MainWindow(QMainWindow):
         self.setWindowTitle(title)
         self.resize(1000, 600)
         
-        self.db_handler = DatabaseHandler()
+        self.db_handler = DatabaseConnection()
         self.data_container = DataContainer(self.db_handler)
         
         self.setup_ui()
@@ -111,6 +111,7 @@ class UI_MainWindow(QMainWindow):
             UniversalLogger.debug(f"Creating new database: {file_path}", caller_class='UI_MainWindow')
             self.db_handler.close_connection()
             self.db_handler.open_connection(file_path)
+            self.data_container.create_tables()
             self.data_container.create_tables()
             self.properties_tab.refresh_data()
             self.tenants_tab.refresh_data()
